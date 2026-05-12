@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SPIN Sales Coach</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">S</div>
+      <div>
+        <h1>SPIN Sales Coach</h1>
+        <p class="tagline">Turn pain points into questions that move the deal forward.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="newSessionBtn" class="btn ghost">+ New Session</button>
+      <select id="sessionPicker" class="select" aria-label="Saved sessions"></select>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: INPUT FORM -->
+    <section class="panel input-panel">
+      <div class="panel-header">
+        <h2>Conversation Inputs</h2>
+        <div class="preset-row">
+          <label for="presetPicker">Preset:</label>
+          <select id="presetPicker" class="select">
+            <option value="">— Start blank —</option>
+            <option value="hireDrivers">Hire Drivers</option>
+            <option value="sellProduct">Sell Product / Service</option>
+            <option value="recruitTalent">Recruit Talent (general)</option>
+            <option value="closeRenewal">Close a Renewal</option>
+          </select>
+          <button id="loadPresetBtn" class="btn small">Load</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="goal">Your Goal <span class="hint">(what you want this conversation to lead to)</span></label>
+        <input id="goal" type="text" placeholder="e.g., Hire this driver / Close the deal / Book a demo" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="prospectName">Prospect / Customer</label>
+          <input id="prospectName" type="text" placeholder="Name or company" />
+        </div>
+        <div class="field">
+          <label for="prospectRole">Role / Type</label>
+          <input id="prospectRole" type="text" placeholder="e.g., Owner-Operator, Fleet Manager" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="situation">Situation <span class="hint">(current state — facts you already know)</span></label>
+        <textarea id="situation" rows="3" placeholder="e.g., 5 years driving OTR, currently with XYZ carrier, paid per mile, away 3 weeks at a time"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="problems">Pain Points / Problems <span class="hint">(one per line — the more specific, the better)</span></label>
+        <textarea id="problems" rows="5" placeholder="Low miles last 3 months
+Slow dispatch responses
+Home time keeps getting canceled
+Equipment breakdowns hurting paychecks"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="outcome">Ideal Outcome <span class="hint">(the picture you want them to see)</span></label>
+        <textarea id="outcome" rows="3" placeholder="e.g., Consistent 3,000+ miles/wk, home every weekend, newer truck, dispatcher who picks up on the first ring"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="stakes">What's at Stake if Nothing Changes? <span class="hint">(optional — feeds urgency)</span></label>
+        <textarea id="stakes" rows="2" placeholder="e.g., Another year of missed birthdays, burning out, falling behind on truck payments"></textarea>
+      </div>
+
+      <div class="actions">
+        <button id="generateBtn" class="btn primary">Generate SPIN Questions</button>
+        <button id="saveBtn" class="btn">Save Session</button>
+        <button id="clearBtn" class="btn ghost">Clear</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: OUTPUT -->
+    <section class="panel output-panel">
+      <div class="panel-header">
+        <h2>Your SPIN Playbook</h2>
+        <div class="output-actions">
+          <button id="copyAllBtn" class="btn small" disabled>Copy All</button>
+          <button id="printBtn" class="btn small" disabled>Print</button>
+        </div>
+      </div>
+
+      <div id="emptyState" class="empty">
+        <div class="empty-icon">▣</div>
+        <p>Fill in the form on the left and click <strong>Generate SPIN Questions</strong>.</p>
+        <p class="empty-sub">You'll get tailored Situation, Problem, Implication, and Need-Payoff questions — plus a vision-casting script to lead the prospect to the outcome.</p>
+      </div>
+
+      <div id="output" class="output hidden"></div>
+    </section>
+  </main>
+
+  <footer class="footnote">
+    <span><strong>SPIN</strong> = <em>Situation</em> · <em>Problem</em> · <em>Implication</em> · <em>Need-Payoff</em> — Neil Rackham's research-backed sales framework.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
