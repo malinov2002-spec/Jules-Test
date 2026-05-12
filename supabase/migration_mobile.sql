@@ -17,7 +17,7 @@ alter table user_preferences add column if not exists google_refresh_token text;
 -- Coach messages: shared chat history for Telegram + phone + future surfaces.
 -- thread = 'main' for free chat, 'kickoff:YYYY-MM-DD' for daily rituals, etc.
 create table if not exists coach_messages (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   thread text not null default 'main',
   role text check (role in ('user', 'assistant', 'system')) not null,
@@ -36,7 +36,7 @@ create index if not exists idx_coach_messages_surface
 -- Used for sending push from the VPS to a specific device if you want server-
 -- side scheduling instead of on-device notifications.
 create table if not exists devices (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   platform text check (platform in ('android', 'ios', 'web')) not null,
   push_token text unique, -- expo push token / FCM / APNS

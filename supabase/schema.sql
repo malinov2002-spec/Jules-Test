@@ -1,12 +1,11 @@
--- Hermes Mobile — combined schema (v1 + v2 + v3 + v4)
+-- Hermes Mobile — combined schema (v1 + v2 + v3 + v4 + mobile additions)
 -- Run this once in the Supabase SQL Editor for your project.
 -- Idempotent: safe to re-run.
-
-create extension if not exists "uuid-ossp";
+-- Uses gen_random_uuid() — no extensions required (built-in on Postgres 13+).
 
 -- ─── Users ───────────────────────────────────────────────────────────────────
 create table if not exists users (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   name text not null,
   timezone text default 'America/New_York',
   created_at timestamptz default now()
@@ -19,7 +18,7 @@ on conflict (id) do nothing;
 
 -- ─── Tasks ───────────────────────────────────────────────────────────────────
 create table if not exists tasks (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   description text not null,
   business text check (business in ('geo_logistics', 'nestlink', 'crownstone', 'personal')) not null,
@@ -52,7 +51,7 @@ create index if not exists idx_tasks_google on tasks(google_task_id) where googl
 
 -- ─── MITs ────────────────────────────────────────────────────────────────────
 create table if not exists mits (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   date date not null,
   business text check (business in ('geo_logistics', 'nestlink', 'crownstone', 'personal')) not null,
@@ -68,7 +67,7 @@ create index if not exists idx_mits_user_date on mits(user_id, date);
 
 -- ─── Check-ins ───────────────────────────────────────────────────────────────
 create table if not exists check_ins (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   type text check (type in ('morning_kickoff', 'evening_shutdown', 'midday_refocus', 'weekly_review')) not null,
   date date not null,
@@ -95,7 +94,7 @@ create index if not exists idx_checkins_user_date_type on check_ins(user_id, dat
 
 -- ─── Decisions ───────────────────────────────────────────────────────────────
 create table if not exists decisions (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   description text not null,
   decision_type text check (decision_type in (
@@ -120,7 +119,7 @@ create index if not exists idx_decisions_user_created on decisions(user_id, crea
 
 -- ─── Commitment loops ────────────────────────────────────────────────────────
 create table if not exists commitment_loops (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   description text not null,
   task_id uuid references tasks(id),
@@ -136,7 +135,7 @@ create index if not exists idx_commitment_loops_user on commitment_loops(user_id
 
 -- ─── Patterns observed ──────────────────────────────────────────────────────
 create table if not exists patterns_observed (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   week_starting date not null,
   pattern_text text not null,
@@ -148,7 +147,7 @@ create table if not exists patterns_observed (
 
 -- ─── Task follow-ups ────────────────────────────────────────────────────────
 create table if not exists task_followups (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   task_id uuid references tasks(id) on delete cascade,
   ping_sent_at timestamptz default now(),
@@ -172,7 +171,7 @@ create index if not exists idx_followups_user_task on task_followups(user_id, ta
 
 -- ─── Task breakdowns ────────────────────────────────────────────────────────
 create table if not exists task_breakdowns (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   task_id uuid references tasks(id) on delete cascade,
   steps jsonb not null,
@@ -190,7 +189,7 @@ create index if not exists idx_breakdowns_user_task on task_breakdowns(user_id, 
 
 -- ─── Quiet periods ──────────────────────────────────────────────────────────
 create table if not exists quiet_periods (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   starts_at timestamptz default now(),
   ends_at timestamptz not null,
@@ -202,7 +201,7 @@ create index if not exists idx_quiet_active on quiet_periods(user_id, ends_at);
 
 -- ─── Suggestions log ────────────────────────────────────────────────────────
 create table if not exists suggestions_log (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   triggered_at timestamptz default now(),
   triggered_by text check (triggered_by in ('user_asked', 'auto_quiet_day')) not null,
@@ -246,18 +245,33 @@ insert into user_preferences (user_id, preferred_book_or_content)
 values ('11111111-1111-1111-1111-111111111111', 'Atomic Habits')
 on conflict (user_id) do nothing;
 
--- ─── Coach messages (added for mobile app chat history) ─────────────────────
+-- ─── Coach messages (shared chat history across Telegram + phone + future) ───
 create table if not exists coach_messages (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   thread text not null default 'main',
   role text check (role in ('user', 'assistant', 'system')) not null,
   content text not null,
   skill text,
+  surface text, -- 'telegram' | 'mobile_android' | 'web' | etc.
   created_at timestamptz default now()
 );
 
 create index if not exists idx_coach_messages_thread on coach_messages(user_id, thread, created_at);
+create index if not exists idx_coach_messages_surface on coach_messages(user_id, surface, created_at desc);
+
+-- ─── Devices (Expo push tokens for server-side notifications) ───────────────
+create table if not exists devices (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references users(id) not null,
+  platform text check (platform in ('android', 'ios', 'web')) not null,
+  push_token text unique,
+  device_name text,
+  last_seen timestamptz default now(),
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_devices_user on devices(user_id, last_seen desc);
 
 -- ─── Views ──────────────────────────────────────────────────────────────────
 create or replace view today_open_tasks as
