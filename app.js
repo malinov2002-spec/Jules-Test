@@ -14,6 +14,7 @@
     outcome: $('outcome'),
     stakes: $('stakes'),
     generateBtn: $('generateBtn'),
+    enhanceBtn: $('enhanceBtn'),
     saveBtn: $('saveBtn'),
     clearBtn: $('clearBtn'),
     newSessionBtn: $('newSessionBtn'),
@@ -24,6 +25,20 @@
     emptyState: $('emptyState'),
     copyAllBtn: $('copyAllBtn'),
     printBtn: $('printBtn'),
+    aiStatusBar: $('aiStatusBar'),
+    // AI Settings modal
+    aiSettingsBtn: $('aiSettingsBtn'),
+    settingsModal: $('settingsModal'),
+    modalCloseBtn: $('modalCloseBtn'),
+    aiCancelBtn: $('aiCancelBtn'),
+    aiSaveBtn: $('aiSaveBtn'),
+    aiTestBtn: $('aiTestBtn'),
+    aiProvider: $('aiProvider'),
+    aiKey: $('aiKey'),
+    aiModel: $('aiModel'),
+    aiInstructions: $('aiInstructions'),
+    aiTestResult: $('aiTestResult'),
+    keyHelp: $('keyHelp'),
   };
 
   // ---------- Presets ----------
@@ -242,7 +257,7 @@
   }
 
   // ---------- Rendering ----------
-  function render(result, inputs) {
+  function render(result, inputs, meta = {}) {
     els.emptyState.classList.add('hidden');
     els.output.classList.remove('hidden');
     els.copyAllBtn.disabled = false;
@@ -256,6 +271,10 @@
           inputs.prospectRole ? ` (${escapeHtml(inputs.prospectRole)})` : ''
         }`
       );
+    }
+    if (meta.ai) {
+      const providerLabel = meta.provider === 'openai' ? 'OpenAI' : 'Claude';
+      summary.push(`<span class="ai-badge">✨ AI: ${escapeHtml(providerLabel)} ${escapeHtml(meta.model || '')}</span>`);
     }
 
     const summaryHtml = summary.length
@@ -446,6 +465,312 @@
   });
 
   els.printBtn.addEventListener('click', () => window.print());
+
+  // ============================================================
+  // AI Integration (OpenAI / Anthropic)
+  // ============================================================
+
+  const AI_STORAGE_KEY = 'spin_ai_settings_v1';
+
+  const MODELS = {
+    openai: [
+      { id: 'gpt-4o', label: 'GPT-4o (recommended)' },
+      { id: 'gpt-4o-mini', label: 'GPT-4o mini (cheaper, faster)' },
+      { id: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+      { id: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (cheapest)' },
+    ],
+    anthropic: [
+      { id: 'claude-opus-4-7', label: 'Claude Opus 4.7 (most capable)' },
+      { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (recommended)' },
+      { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (fastest, cheapest)' },
+    ],
+  };
+
+  const DEFAULT_AI_INSTRUCTIONS = `You are an expert sales coach trained in Neil Rackham's SPIN selling model. You help the user prepare for one-on-one conversations with prospects or candidates.
+
+Your job: take the user's inputs (goal, prospect, current situation, pain points, ideal outcome, stakes) and produce SPIN-framework questions that:
+- Sound natural and conversational, not scripted
+- Reference the prospect's specific situation, not generic placeholders
+- Build emotional weight as they move from Situation → Problem → Implication → Need-Payoff
+- End with a vision-casting script that paints the ideal outcome vividly enough that the prospect can picture themselves living it`;
+
+  function loadAiSettings() {
+    try { return JSON.parse(localStorage.getItem(AI_STORAGE_KEY)) || {}; }
+    catch (_) { return {}; }
+  }
+
+  function saveAiSettings(s) {
+    localStorage.setItem(AI_STORAGE_KEY, JSON.stringify(s));
+  }
+
+  function populateModels(provider) {
+    const models = MODELS[provider] || [];
+    els.aiModel.innerHTML = models
+      .map((m) => `<option value="${m.id}">${escapeHtml(m.label)}</option>`)
+      .join('');
+  }
+
+  function updateKeyHelp(provider) {
+    els.keyHelp.querySelectorAll('span[data-provider]').forEach((span) => {
+      span.classList.toggle('hidden', span.dataset.provider !== provider);
+    });
+  }
+
+  function openSettings() {
+    const s = loadAiSettings();
+    const provider = s.provider || 'openai';
+    els.aiProvider.value = provider;
+    populateModels(provider);
+    updateKeyHelp(provider);
+    els.aiKey.value = s.key || '';
+    els.aiModel.value = s.model || MODELS[provider][0].id;
+    els.aiInstructions.value = s.instructions || '';
+    els.aiTestResult.classList.add('hidden');
+    els.settingsModal.classList.remove('hidden');
+  }
+
+  function closeSettings() {
+    els.settingsModal.classList.add('hidden');
+  }
+
+  function showAiStatus(msg, kind = 'info') {
+    els.aiStatusBar.textContent = msg;
+    els.aiStatusBar.className = 'ai-status-bar ' + (kind === 'info' ? '' : kind);
+    els.aiStatusBar.classList.remove('hidden');
+  }
+
+  function hideAiStatus() {
+    els.aiStatusBar.classList.add('hidden');
+  }
+
+  function buildAiUserPrompt(inputs) {
+    const lines = [];
+    if (inputs.goal) lines.push(`GOAL: ${inputs.goal}`);
+    if (inputs.prospectName || inputs.prospectRole) {
+      lines.push(`PROSPECT: ${inputs.prospectName || '(unnamed)'}${inputs.prospectRole ? ` — ${inputs.prospectRole}` : ''}`);
+    }
+    if (inputs.situation) lines.push(`SITUATION (current state, facts known):\n${inputs.situation}`);
+    if (inputs.problems.length) lines.push(`PAIN POINTS / PROBLEMS:\n${inputs.problems.map(p => '- ' + p).join('\n')}`);
+    if (inputs.outcome.length) lines.push(`IDEAL OUTCOME:\n${inputs.outcome.map(o => '- ' + o).join('\n')}`);
+    if (inputs.stakes) lines.push(`WHAT'S AT STAKE IF NOTHING CHANGES:\n${inputs.stakes}`);
+
+    return lines.join('\n\n') + `
+
+Generate 5–7 questions per SPIN stage, plus a vision-casting script.
+
+Return ONLY a valid JSON object — no markdown fences, no commentary — with this exact shape:
+
+{
+  "situationQs": ["...", "..."],
+  "problemQs": ["...", "..."],
+  "implicationQs": ["...", "..."],
+  "needPayoffQs": ["...", "..."],
+  "visionScript": "A single flowing paragraph that paints the ideal outcome vividly, ending with a question that invites them to picture themselves there."
+}`;
+  }
+
+  function buildAiSystemPrompt(customInstructions) {
+    const base = customInstructions && customInstructions.trim()
+      ? customInstructions.trim()
+      : DEFAULT_AI_INSTRUCTIONS;
+
+    return base + `
+
+When responding, always return strict JSON with this shape and no other text:
+{
+  "situationQs": string[],
+  "problemQs": string[],
+  "implicationQs": string[],
+  "needPayoffQs": string[],
+  "visionScript": string
+}`;
+  }
+
+  async function callOpenAI({ key, model, system, user }) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.8,
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`OpenAI ${res.status}: ${errText.slice(0, 400)}`);
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('OpenAI returned no content.');
+    return JSON.parse(content);
+  }
+
+  async function callAnthropic({ key, model, system, user }) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 2048,
+        system,
+        messages: [{ role: 'user', content: user }],
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 400)}`);
+    }
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text?.trim();
+    if (!text) throw new Error('Anthropic returned no content.');
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    return JSON.parse(cleaned);
+  }
+
+  async function aiGenerate(inputs) {
+    const s = loadAiSettings();
+    if (!s.key || !s.provider) {
+      throw new Error('No API key configured. Open AI Settings to add one.');
+    }
+    const system = buildAiSystemPrompt(s.instructions);
+    const user = buildAiUserPrompt(inputs);
+    const args = { key: s.key, model: s.model || MODELS[s.provider][0].id, system, user };
+    if (s.provider === 'openai') return callOpenAI(args);
+    if (s.provider === 'anthropic') return callAnthropic(args);
+    throw new Error(`Unknown provider: ${s.provider}`);
+  }
+
+  async function testAiConnection() {
+    const provider = els.aiProvider.value;
+    const key = els.aiKey.value.trim();
+    const model = els.aiModel.value;
+
+    if (!key) {
+      showTestResult('Enter an API key first.', 'error');
+      return;
+    }
+
+    showTestResult('Testing connection...', 'info');
+    els.aiTestBtn.disabled = true;
+
+    try {
+      const args = {
+        key,
+        model,
+        system: 'You respond with valid JSON only.',
+        user: 'Respond with exactly this JSON and nothing else: {"ok": true}',
+      };
+      const result = provider === 'openai' ? await callOpenAI(args) : await callAnthropic(args);
+      if (result && result.ok) {
+        showTestResult(`✓ Connected to ${provider === 'openai' ? 'OpenAI' : 'Anthropic'} using ${model}.`, 'success');
+      } else {
+        showTestResult(`Connected, but unexpected response: ${JSON.stringify(result).slice(0, 200)}`, 'success');
+      }
+    } catch (err) {
+      showTestResult(`✗ ${err.message}`, 'error');
+    } finally {
+      els.aiTestBtn.disabled = false;
+    }
+  }
+
+  function showTestResult(msg, kind) {
+    els.aiTestResult.textContent = msg;
+    els.aiTestResult.className = 'ai-test-result ' + kind;
+    els.aiTestResult.classList.remove('hidden');
+  }
+
+  function validateAiResponse(r) {
+    const required = ['situationQs', 'problemQs', 'implicationQs', 'needPayoffQs', 'visionScript'];
+    for (const k of required) {
+      if (!(k in r)) throw new Error(`AI response missing field: ${k}`);
+    }
+    for (const k of ['situationQs', 'problemQs', 'implicationQs', 'needPayoffQs']) {
+      if (!Array.isArray(r[k])) throw new Error(`AI response field ${k} must be an array`);
+    }
+    return r;
+  }
+
+  // ---------- AI Event Wiring ----------
+  els.aiSettingsBtn.addEventListener('click', openSettings);
+  els.modalCloseBtn.addEventListener('click', closeSettings);
+  els.aiCancelBtn.addEventListener('click', closeSettings);
+  els.settingsModal.querySelector('.modal-backdrop').addEventListener('click', closeSettings);
+
+  els.aiProvider.addEventListener('change', (e) => {
+    populateModels(e.target.value);
+    updateKeyHelp(e.target.value);
+    els.aiTestResult.classList.add('hidden');
+  });
+
+  els.aiSaveBtn.addEventListener('click', () => {
+    const settings = {
+      provider: els.aiProvider.value,
+      key: els.aiKey.value.trim(),
+      model: els.aiModel.value,
+      instructions: els.aiInstructions.value,
+    };
+    saveAiSettings(settings);
+    closeSettings();
+    if (settings.key) {
+      toast('AI settings saved — Enhance with AI is ready.');
+    } else {
+      toast('Settings saved (no API key — AI disabled).');
+    }
+  });
+
+  els.aiTestBtn.addEventListener('click', testAiConnection);
+
+  els.enhanceBtn.addEventListener('click', async () => {
+    const inputs = getInputs();
+    if (!inputs.goal && !inputs.problems.length && !inputs.situation) {
+      toast('Add at least a goal or some problems first.');
+      return;
+    }
+
+    const s = loadAiSettings();
+    if (!s.key) {
+      showAiStatus('No API key configured. Click ⚙ AI Settings (top right) to add one.', 'error');
+      openSettings();
+      return;
+    }
+
+    els.enhanceBtn.classList.add('loading');
+    els.enhanceBtn.disabled = true;
+    els.generateBtn.disabled = true;
+    showAiStatus(`Generating with ${s.provider === 'openai' ? 'OpenAI' : 'Claude'} (${s.model})...`, 'info');
+
+    try {
+      const result = await aiGenerate(inputs);
+      validateAiResponse(result);
+      render(result, inputs, { ai: true, provider: s.provider, model: s.model });
+      showAiStatus(`✓ Generated with ${s.provider === 'openai' ? 'OpenAI' : 'Claude'} (${s.model}).`, 'success');
+      setTimeout(hideAiStatus, 4000);
+      els.output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      showAiStatus(`✗ ${err.message}`, 'error');
+    } finally {
+      els.enhanceBtn.classList.remove('loading');
+      els.enhanceBtn.disabled = false;
+      els.generateBtn.disabled = false;
+    }
+  });
 
   // Init
   refreshSessionPicker();

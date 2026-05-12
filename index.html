@@ -16,6 +16,7 @@
       </div>
     </div>
     <div class="header-actions">
+      <button id="aiSettingsBtn" class="btn ghost" title="Configure AI integration">⚙ AI Settings</button>
       <button id="newSessionBtn" class="btn ghost">+ New Session</button>
       <select id="sessionPicker" class="select" aria-label="Saved sessions"></select>
     </div>
@@ -80,9 +81,11 @@ Equipment breakdowns hurting paychecks"></textarea>
 
       <div class="actions">
         <button id="generateBtn" class="btn primary">Generate SPIN Questions</button>
+        <button id="enhanceBtn" class="btn primary ai" title="Use your configured AI to generate tailored questions">✨ Enhance with AI</button>
         <button id="saveBtn" class="btn">Save Session</button>
         <button id="clearBtn" class="btn ghost">Clear</button>
       </div>
+      <div id="aiStatusBar" class="ai-status-bar hidden"></div>
     </section>
 
     <!-- RIGHT: OUTPUT -->
@@ -108,6 +111,59 @@ Equipment breakdowns hurting paychecks"></textarea>
   <footer class="footnote">
     <span><strong>SPIN</strong> = <em>Situation</em> · <em>Problem</em> · <em>Implication</em> · <em>Need-Payoff</em> — Neil Rackham's research-backed sales framework.</span>
   </footer>
+
+  <!-- AI Settings Modal -->
+  <div id="settingsModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>AI Settings</h2>
+        <button class="modal-close" id="modalCloseBtn" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Configure an AI model to power the <strong>Enhance with AI</strong> button. Your API key and instructions are stored only in your browser's local storage — they are never sent anywhere except directly to the AI provider you choose.
+        </p>
+
+        <div class="field">
+          <label for="aiProvider">AI Provider</label>
+          <select id="aiProvider" class="select full">
+            <option value="openai">OpenAI (ChatGPT / GPT-4o)</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="aiKey">API Key <span class="hint">stored locally — never committed</span></label>
+          <input id="aiKey" type="password" placeholder="sk-..." autocomplete="off" />
+          <p class="field-hint" id="keyHelp">
+            <span data-provider="openai">Get a key at <em>platform.openai.com → API Keys</em>.</span>
+            <span data-provider="anthropic" class="hidden">Get a key at <em>console.anthropic.com → API Keys</em>.</span>
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="aiModel">Model</label>
+          <select id="aiModel" class="select full"></select>
+        </div>
+
+        <div class="field">
+          <label for="aiInstructions">
+            Custom Instructions
+            <span class="hint">(paste your Custom GPT's "Instructions" here — leave blank to use defaults)</span>
+          </label>
+          <textarea id="aiInstructions" rows="10" placeholder="You are an expert sales coach specializing in trucking recruitment. You use the SPIN selling model to..."></textarea>
+        </div>
+
+        <div id="aiTestResult" class="ai-test-result hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn ghost" id="aiCancelBtn">Cancel</button>
+        <button class="btn" id="aiTestBtn">Test Connection</button>
+        <button class="btn primary" id="aiSaveBtn">Save Settings</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
