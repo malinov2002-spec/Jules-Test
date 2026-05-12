@@ -1,0 +1,21 @@
+{
+  "name": "spin-sales-coach",
+  "version": "1.0.0",
+  "description": "SPIN-model sales coaching app — wraps the web app in a Capacitor Android shell.",
+  "private": true,
+  "scripts": {
+    "copy-web": "rm -rf www && mkdir -p www/icons && cp index.html styles.css app.js manifest.webmanifest service-worker.js www/ && cp icons/* www/icons/",
+    "prep": "npm run copy-web && npx cap sync",
+    "android:add": "npm run copy-web && npx cap add android",
+    "android:open": "npm run prep && npx cap open android",
+    "android:run": "npm run prep && npx cap run android",
+    "serve": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

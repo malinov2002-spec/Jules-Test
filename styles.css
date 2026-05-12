@@ -718,6 +718,8 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.55; }
 
 .ai-status-bar.hidden { display: none; }
 
+.hidden { display: none !important; }
+
 .ai-badge {
   display: inline-flex;
   align-items: center;

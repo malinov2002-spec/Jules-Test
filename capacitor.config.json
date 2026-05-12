@@ -1,0 +1,11 @@
+{
+  "appId": "com.spincoach.app",
+  "appName": "SPIN Coach",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

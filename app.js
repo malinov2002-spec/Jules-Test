@@ -782,6 +782,45 @@ When responding, always return strict JSON with this shape and no other text:
     }
   });
 
+  // ============================================================
+  // PWA: Service worker + install prompt
+  // ============================================================
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch((err) => {
+        console.warn('SW registration failed:', err);
+      });
+    });
+  }
+
+  const installBtn = document.getElementById('installBtn');
+  let deferredInstall = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstall = e;
+    if (installBtn) installBtn.classList.remove('hidden');
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredInstall) {
+        toast('Use your browser menu → "Add to Home Screen".');
+        return;
+      }
+      deferredInstall.prompt();
+      const choice = await deferredInstall.userChoice;
+      if (choice.outcome === 'accepted') toast('Installing...');
+      deferredInstall = null;
+      installBtn.classList.add('hidden');
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if (installBtn) installBtn.classList.add('hidden');
+    toast('Installed! Open from your home screen.');
+  });
+
   // Init
   refreshSessionPicker();
 })();

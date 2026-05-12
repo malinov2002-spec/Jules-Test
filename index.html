@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SPIN Sales Coach</title>
 <meta name="description" content="Turn pain points into questions that close deals — SPIN-model sales coach." />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#0a0f1f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="SPIN" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -17,6 +25,7 @@
       </div>
     </div>
     <div class="header-actions">
+      <button id="installBtn" class="btn primary hidden" title="Install SPIN as an app">⬇ Install App</button>
       <button id="aiSettingsBtn" class="btn ghost" title="Configure AI integration">⚙ AI Settings</button>
       <button id="newSessionBtn" class="btn ghost">+ New</button>
       <select id="sessionPicker" class="select" aria-label="Saved sessions"></select>
