@@ -11,23 +11,58 @@ device with your own API keys.
 ## What's in here
 
 ```
-app/                      Expo Router screens
-src/lib/                  Supabase, Anthropic, Google Tasks, notifications
-src/coach/                Coach prompt + skill primers + action runner
-src/components/           Reusable UI bits
-supabase/schema.sql       Combined v1-v4 schema, idempotent
-hermes_source/            Original Hermes/Telegram bot files (reference)
-docs/SETUP.md             Step-by-step setup
+app/                            Expo Router screens (Android phone app)
+src/lib/                        Supabase, Anthropic, Google Tasks, notifications
+src/coach/                      Coach prompt, skill primers, runner, gateway client
+src/components/                 Reusable UI bits
+vps_gateway/                    FastAPI sidecar that runs next to hermes-gateway
+supabase/schema.sql             Fresh Supabase schema (combined v1-v4)
+supabase/migration_mobile.sql   Migration if you already have v1-v4 applied
+hermes_source/                  Original Hermes/Telegram bot files (reference)
+docs/SETUP.md                   Phone app setup
+vps_gateway/SETUP.md            VPS sidecar setup
+```
+
+## Two deployment modes
+
+**Direct mode** (no VPS work):
+phone → Anthropic API → Supabase. Standalone, useful for quick prototyping.
+
+**Gateway mode** (recommended once your VPS is up):
+phone → VPS FastAPI sidecar → Anthropic API → Supabase.
+Telegram bot and phone share the same coach brain, same chat history, same
+skill files. Edit `~/.hermes/skills/morning_kickoff/SKILL.md` once and both
+surfaces pick up the change.
+
+```
+   ┌──────────┐    ┌──────────┐
+   │ Telegram │    │  Phone   │
+   └────┬─────┘    └────┬─────┘
+        │               │ HTTPS POST /coach
+        ▼               ▼
+   ┌─────────────────────────────┐    ┌──────────────┐
+   │ hermes-gateway              │───▶│ Anthropic    │
+   │ + hermes-coach-gateway      │    └──────────────┘
+   │   (FastAPI, this repo)      │
+   └──────────┬──────────────────┘
+              │
+              ▼
+         ┌──────────┐
+         │ Supabase │
+         └──────────┘
 ```
 
 ## Quick start
 
-1. `npm install`
-2. `cp .env.example .env` and fill in Supabase, Anthropic, Google client IDs
-3. Create a Supabase project and run `supabase/schema.sql` in the SQL Editor
-4. `npx expo start --android` and scan the QR with Expo Go on your phone
+If you already have Hermes running on a VPS (Telegram bot, Supabase, the works):
 
-Full walkthrough: [`docs/SETUP.md`](docs/SETUP.md).
+1. Run `supabase/migration_mobile.sql` in Supabase SQL Editor
+2. Deploy the VPS sidecar: [`vps_gateway/SETUP.md`](vps_gateway/SETUP.md)
+3. `npm install` on your laptop, `cp .env.example .env`, fill in
+   `EXPO_PUBLIC_GATEWAY_URL` and `EXPO_PUBLIC_GATEWAY_TOKEN`
+4. `npx expo start --android`, scan QR with Expo Go
+
+Starting fresh (no VPS yet): [`docs/SETUP.md`](docs/SETUP.md) walks the direct mode.
 
 ## How it differs from the original Hermes
 

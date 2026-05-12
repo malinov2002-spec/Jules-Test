@@ -1,0 +1,16 @@
+[Unit]
+Description=Hermes Coach Gateway (FastAPI sidecar for mobile)
+After=network.target hermes-gateway.service
+Wants=hermes-gateway.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/hermes_mobile
+EnvironmentFile=/opt/hermes_mobile/vps_gateway/.env
+ExecStart=/opt/hermes_mobile/.venv/bin/uvicorn vps_gateway.app:app --host 127.0.0.1 --port 8787
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

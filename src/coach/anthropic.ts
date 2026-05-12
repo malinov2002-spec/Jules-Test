@@ -3,13 +3,25 @@ import { env } from '../lib/env';
 import { COACH_SYSTEM_PROMPT } from './systemPrompt';
 import { SKILL_PRIMERS, SkillName } from './skills';
 
-// Direct-from-device Anthropic client. For a single-user personal app this is
-// acceptable; if you ever ship this to others, proxy through a backend.
-export const anthropic = new Anthropic({
-  apiKey: env.anthropicApiKey,
-  // dangerouslyAllowBrowser also covers React Native fetch environment.
-  dangerouslyAllowBrowser: true,
-});
+// Lazy Anthropic client. Only constructed when we actually need to call
+// Claude directly from the device — in gateway mode this is never used and
+// EXPO_PUBLIC_ANTHROPIC_API_KEY can be empty.
+let _client: Anthropic | null = null;
+function client(): Anthropic {
+  if (_client) return _client;
+  if (!env.anthropicApiKey) {
+    throw new Error(
+      'EXPO_PUBLIC_ANTHROPIC_API_KEY is empty and EXPO_PUBLIC_GATEWAY_URL is not set. ' +
+        'Set one or the other in .env.',
+    );
+  }
+  _client = new Anthropic({
+    apiKey: env.anthropicApiKey,
+    // dangerouslyAllowBrowser also covers React Native fetch environment.
+    dangerouslyAllowBrowser: true,
+  });
+  return _client;
+}
 
 export const COACH_MODEL = 'claude-sonnet-4-6';
 export const COACH_FALLBACK_MODEL = 'claude-haiku-4-5-20251001';
@@ -78,7 +90,7 @@ export async function sendToCoach(ctx: CoachContext): Promise<CoachReply> {
 
   let resp: Anthropic.Messages.Message;
   try {
-    resp = await anthropic.messages.create({
+    resp = await client().messages.create({
       model: COACH_MODEL,
       max_tokens: 1024,
       temperature: 0.7,
@@ -86,7 +98,7 @@ export async function sendToCoach(ctx: CoachContext): Promise<CoachReply> {
       messages,
     });
   } catch (e) {
-    resp = await anthropic.messages.create({
+    resp = await client().messages.create({
       model: COACH_FALLBACK_MODEL,
       max_tokens: 1024,
       temperature: 0.7,

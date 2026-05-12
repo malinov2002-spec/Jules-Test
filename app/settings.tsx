@@ -53,7 +53,14 @@ export default function SettingsScreen() {
     <Screen title="Settings" subtitle="One-time setup. Update env vars to change keys.">
       <Text style={styles.section}>Connection check</Text>
       <Row label="Supabase URL" value={env.supabaseUrl.replace(/^https?:\/\//, '').slice(0, 32) + '…'} />
-      <Row label="Anthropic key" value={env.anthropicApiKey.slice(0, 12) + '…'} />
+      <Row
+        label="Coach backend"
+        value={env.useGateway ? `Gateway → ${env.gatewayUrl.replace(/^https?:\/\//, '')}` : 'Direct (Anthropic)'}
+        valueColor={env.useGateway ? theme.good : theme.warn}
+      />
+      {!env.useGateway ? (
+        <Row label="Anthropic key" value={env.anthropicApiKey.slice(0, 12) + '…'} />
+      ) : null}
       <Row label="User ID" value={env.userId.slice(0, 8) + '…'} />
 
       <Text style={styles.section}>Google Tasks sync</Text>

@@ -7,8 +7,10 @@ import {
   updateCheckIn,
   completeCheckIn,
 } from '../lib/db';
+import { env } from '../lib/env';
 import { isoDate, timeBucket } from '../lib/types';
 import { CoachAction, CoachReply, ChatTurn, sendToCoach } from './anthropic';
+import { sendToGateway } from './gateway';
 import { SkillName } from './skills';
 
 export interface RunOptions {
@@ -20,7 +22,17 @@ export interface RunOptions {
 }
 
 export async function runCoach(opts: RunOptions): Promise<CoachReply> {
-  // Persist user turn first so the chat is durable even if the API call fails.
+  // VPS gateway path — gateway owns persistence + actions. Phone just relays.
+  if (env.useGateway) {
+    return sendToGateway({
+      thread: opts.thread,
+      skill: opts.skill,
+      message: opts.userMessage,
+    });
+  }
+
+  // Direct-to-Anthropic path. Persist user turn first so the chat is durable
+  // even if the API call fails.
   await appendMessage(opts.thread, 'user', opts.userMessage, opts.skill);
 
   const reply = await sendToCoach({
