@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Hermes",
+    "slug": "hermes-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "hermes",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "android": {
+      "package": "com.misho.hermes",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0b0c"
+      },
+      "permissions": [
+        "NOTIFICATIONS",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#ffffff"
+        }
+      ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}

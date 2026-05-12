@@ -1,0 +1,100 @@
+# Hermes Agent Configuration for Misho's ADHD Coach
+# Place this at ~/.hermes/config.yaml
+
+# ─── Main model ──────────────────────────────────────────────────────────────
+model:
+  provider: "openrouter"
+  # Warmer, less robotic than GPT-4o for coaching tone
+  model: "anthropic/claude-sonnet-4.6"
+  # If costs are too high, fall back to claude-haiku-4.5 or gpt-4o-mini for casual capture
+  fallback_model:
+    provider: "main"
+    model: "anthropic/claude-haiku-4.5"
+  temperature: 0.7  # warmer for conversation, lower this if responses get sloppy
+  max_tokens: 2000
+
+# ─── Auxiliary tasks (vision, compression) ───────────────────────────────────
+auxiliary:
+  vision:
+    provider: "auto"
+    timeout: 120
+  compression:
+    provider: "main"
+    # Hermes auto-compresses long conversations; let main model handle it
+
+# ─── System prompt ───────────────────────────────────────────────────────────
+system_prompt_file: "~/.hermes/system_prompt.md"
+
+# ─── Skills ──────────────────────────────────────────────────────────────────
+# Hermes auto-discovers skills in this folder
+skills_dir: "~/.hermes/skills"
+
+# ─── Tools enabled ───────────────────────────────────────────────────────────
+tools:
+  enabled:
+    - terminal           # only for self-debugging; restrict in production
+    - web_search         # for looking up Geo Logistics regs, NestLink tech docs, etc
+    - memory             # Hermes's built-in persistent memory
+    - scheduled_tasks    # cron — required for morning/evening rituals
+    - custom_supabase    # the Supabase tool — see supabase/tool.py
+  disabled:
+    - browser_automation # not needed for Phase 1; turn on later if useful
+    - image_generation   # not needed for Phase 1
+
+# ─── Custom tools ────────────────────────────────────────────────────────────
+custom_tools:
+  - name: supabase
+    path: "~/.hermes/tools/supabase_tool.py"
+    config:
+      url: "${SUPABASE_URL}"
+      service_key: "${SUPABASE_SERVICE_KEY}"
+
+# ─── Messaging gateway ───────────────────────────────────────────────────────
+gateway:
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    # Lock the bot to only Misho — replace with your Telegram user ID
+    allowed_users:
+      - "YOUR_TELEGRAM_USER_ID_HERE"
+    # Send voice messages back as voice (TTS) when Misho sends voice in
+    voice_response: true
+    # Transcribe Misho's voice notes using Whisper
+    voice_transcription: true
+
+# ─── Memory ──────────────────────────────────────────────────────────────────
+memory:
+  # Hermes's curated memory — bounded, summarizes over time
+  # For longitudinal patterns (broken commitments across weeks),
+  # we use Supabase instead — see the supabase tool
+  max_entries: 500
+  auto_curate: true
+  curation_threshold: 400  # start summarizing when we hit 400 entries
+
+# ─── Scheduled automations ───────────────────────────────────────────────────
+# These can also be created at runtime via "schedule the morning kickoff for 7am"
+# but pre-defining them ensures they exist from day 1
+scheduled_tasks:
+  - name: "morning_kickoff"
+    cron: "0 7 * * 1-5"  # 7 AM weekdays
+    timezone: "America/New_York"  # Michigan, adjust if needed
+    skill: "morning_kickoff"
+    action: "trigger_via_telegram"
+  - name: "evening_shutdown"
+    cron: "0 20 * * 1-5"  # 8 PM weekdays
+    timezone: "America/New_York"
+    skill: "evening_shutdown"
+    action: "trigger_via_telegram"
+
+# ─── Logging ─────────────────────────────────────────────────────────────────
+logging:
+  level: "INFO"
+  file: "~/.hermes/logs/coach.log"
+  rotate: "daily"
+  keep_days: 30
+
+# ─── Environment variables (set these via .env or systemd unit) ──────────────
+# SUPABASE_URL=https://yourproject.supabase.co
+# SUPABASE_SERVICE_KEY=eyJ...
+# TELEGRAM_BOT_TOKEN=123456789:ABC...
+# OPENROUTER_API_KEY=sk-or-...
