@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SPIN Sales Coach</title>
+<meta name="description" content="Turn pain points into questions that close deals — SPIN-model sales coach." />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,77 +13,74 @@
       <div class="logo">S</div>
       <div>
         <h1>SPIN Sales Coach</h1>
-        <p class="tagline">Turn pain points into questions that move the deal forward.</p>
+        <p class="tagline">Turn pain into questions that close.</p>
       </div>
     </div>
     <div class="header-actions">
       <button id="aiSettingsBtn" class="btn ghost" title="Configure AI integration">⚙ AI Settings</button>
-      <button id="newSessionBtn" class="btn ghost">+ New Session</button>
+      <button id="newSessionBtn" class="btn ghost">+ New</button>
       <select id="sessionPicker" class="select" aria-label="Saved sessions"></select>
     </div>
   </header>
 
   <main class="layout">
-    <!-- LEFT: INPUT FORM -->
+    <!-- LEFT: INPUTS -->
     <section class="panel input-panel">
       <div class="panel-header">
         <h2>Conversation Inputs</h2>
         <div class="preset-row">
           <label for="presetPicker">Preset:</label>
           <select id="presetPicker" class="select">
-            <option value="">— Start blank —</option>
+            <option value="">— Blank —</option>
             <option value="hireDrivers">Hire Drivers</option>
-            <option value="sellProduct">Sell Product / Service</option>
-            <option value="recruitTalent">Recruit Talent (general)</option>
-            <option value="closeRenewal">Close a Renewal</option>
+            <option value="sellProduct">Sell Product</option>
+            <option value="recruitTalent">Recruit Talent</option>
+            <option value="closeRenewal">Close Renewal</option>
           </select>
           <button id="loadPresetBtn" class="btn small">Load</button>
         </div>
       </div>
 
       <div class="field">
-        <label for="goal">Your Goal <span class="hint">(what you want this conversation to lead to)</span></label>
-        <input id="goal" type="text" placeholder="e.g., Hire this driver / Close the deal / Book a demo" />
+        <label for="goal">Your Goal <span class="hint">what this convo should lead to</span></label>
+        <input id="goal" type="text" placeholder="Hire this driver / Close the deal / Book a demo" />
       </div>
 
       <div class="grid-2">
         <div class="field">
-          <label for="prospectName">Prospect / Customer</label>
+          <label for="prospectName">Prospect</label>
           <input id="prospectName" type="text" placeholder="Name or company" />
         </div>
         <div class="field">
           <label for="prospectRole">Role / Type</label>
-          <input id="prospectRole" type="text" placeholder="e.g., Owner-Operator, Fleet Manager" />
+          <input id="prospectRole" type="text" placeholder="Owner-Operator, Fleet Mgr…" />
         </div>
       </div>
 
       <div class="field">
-        <label for="situation">Situation <span class="hint">(current state — facts you already know)</span></label>
-        <textarea id="situation" rows="3" placeholder="e.g., 5 years driving OTR, currently with XYZ carrier, paid per mile, away 3 weeks at a time"></textarea>
+        <label for="situation">Situation <span class="hint">facts about their current state</span></label>
+        <textarea id="situation" rows="3" placeholder="5 yrs OTR, with XYZ carrier, paid per mile, away 3 weeks at a time…"></textarea>
       </div>
 
       <div class="field">
-        <label for="problems">Pain Points / Problems <span class="hint">(one per line — the more specific, the better)</span></label>
-        <textarea id="problems" rows="5" placeholder="Low miles last 3 months
-Slow dispatch responses
-Home time keeps getting canceled
-Equipment breakdowns hurting paychecks"></textarea>
+        <label for="problems">Pain Points <span class="hint">one per line — be specific</span></label>
+        <textarea id="problems" rows="5" placeholder="Low miles last 3 months&#10;Slow dispatch responses&#10;Home time keeps getting canceled&#10;Equipment breakdowns hurting paychecks"></textarea>
       </div>
 
       <div class="field">
-        <label for="outcome">Ideal Outcome <span class="hint">(the picture you want them to see)</span></label>
-        <textarea id="outcome" rows="3" placeholder="e.g., Consistent 3,000+ miles/wk, home every weekend, newer truck, dispatcher who picks up on the first ring"></textarea>
+        <label for="outcome">Ideal Outcome <span class="hint">the picture you want them to see</span></label>
+        <textarea id="outcome" rows="3" placeholder="Consistent 3,000+ miles/wk, home every weekend, newer truck, dispatcher who picks up first ring"></textarea>
       </div>
 
       <div class="field">
-        <label for="stakes">What's at Stake if Nothing Changes? <span class="hint">(optional — feeds urgency)</span></label>
-        <textarea id="stakes" rows="2" placeholder="e.g., Another year of missed birthdays, burning out, falling behind on truck payments"></textarea>
+        <label for="stakes">What's at Stake? <span class="hint">optional — feeds urgency</span></label>
+        <textarea id="stakes" rows="2" placeholder="Another year of missed birthdays, burning out, falling behind on truck payments"></textarea>
       </div>
 
       <div class="actions">
-        <button id="generateBtn" class="btn primary">Generate SPIN Questions</button>
-        <button id="enhanceBtn" class="btn primary ai" title="Use your configured AI to generate tailored questions">✨ Enhance with AI</button>
-        <button id="saveBtn" class="btn">Save Session</button>
+        <button id="generateBtn" class="btn primary">Generate Questions</button>
+        <button id="enhanceBtn" class="btn primary ai" title="Use your configured AI">✨ Enhance with AI</button>
+        <button id="saveBtn" class="btn">Save</button>
         <button id="clearBtn" class="btn ghost">Clear</button>
       </div>
       <div id="aiStatusBar" class="ai-status-bar hidden"></div>
@@ -99,9 +97,19 @@ Equipment breakdowns hurting paychecks"></textarea>
       </div>
 
       <div id="emptyState" class="empty">
-        <div class="empty-icon">▣</div>
-        <p>Fill in the form on the left and click <strong>Generate SPIN Questions</strong>.</p>
-        <p class="empty-sub">You'll get tailored Situation, Problem, Implication, and Need-Payoff questions — plus a vision-casting script to lead the prospect to the outcome.</p>
+        <div class="empty-wrap">
+          <div class="empty-icon"></div>
+          <div class="empty-icon-inner">◆</div>
+        </div>
+        <h3>Ready when you are.</h3>
+        <p>Fill in the form on the left, then hit <strong style="color:var(--text)">Generate Questions</strong> for instant SPIN coaching — or <strong style="color:#f472b6">Enhance with AI</strong> for tailored AI-written questions.</p>
+        <div class="empty-steps">
+          <div class="empty-step"><strong>S</strong>Situation</div>
+          <div class="empty-step"><strong>P</strong>Problem</div>
+          <div class="empty-step"><strong>I</strong>Implication</div>
+          <div class="empty-step"><strong>N</strong>Need-Payoff</div>
+          <div class="empty-step"><strong>★</strong>Vision</div>
+        </div>
       </div>
 
       <div id="output" class="output hidden"></div>
@@ -109,7 +117,7 @@ Equipment breakdowns hurting paychecks"></textarea>
   </main>
 
   <footer class="footnote">
-    <span><strong>SPIN</strong> = <em>Situation</em> · <em>Problem</em> · <em>Implication</em> · <em>Need-Payoff</em> — Neil Rackham's research-backed sales framework.</span>
+    <strong style="color:var(--text-soft)">SPIN</strong> &nbsp;=&nbsp; <em>Situation</em> · <em>Problem</em> · <em>Implication</em> · <em>Need-Payoff</em> &nbsp;—&nbsp; Neil Rackham's research-backed sales framework
   </footer>
 
   <!-- AI Settings Modal -->
@@ -122,7 +130,7 @@ Equipment breakdowns hurting paychecks"></textarea>
       </div>
       <div class="modal-body">
         <p class="modal-desc">
-          Configure an AI model to power the <strong>Enhance with AI</strong> button. Your API key and instructions are stored only in your browser's local storage — they are never sent anywhere except directly to the AI provider you choose.
+          Configure an AI model to power the <strong>✨ Enhance with AI</strong> button. Your API key and instructions are stored only in your browser's local storage — never sent anywhere except directly to the AI provider you pick.
         </p>
 
         <div class="field">
@@ -150,7 +158,7 @@ Equipment breakdowns hurting paychecks"></textarea>
         <div class="field">
           <label for="aiInstructions">
             Custom Instructions
-            <span class="hint">(paste your Custom GPT's "Instructions" here — leave blank to use defaults)</span>
+            <span class="hint">paste your Custom GPT's instructions — leave blank for defaults</span>
           </label>
           <textarea id="aiInstructions" rows="10" placeholder="You are an expert sales coach specializing in trucking recruitment. You use the SPIN selling model to..."></textarea>
         </div>

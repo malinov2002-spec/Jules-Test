@@ -283,10 +283,10 @@
 
     els.output.innerHTML = `
       ${summaryHtml}
-      ${stageHtml('s', 'S — Situation Questions', 'Open the conversation. Confirm the facts, build rapport, set context.', result.situationQs)}
-      ${stageHtml('p', 'P — Problem Questions', 'Get them to verbalize their pain points in their own words.', result.problemQs)}
-      ${stageHtml('i', 'I — Implication Questions', 'Expand the pain. Make them feel the cost of doing nothing.', result.implicationQs)}
-      ${stageHtml('n', 'N — Need-Payoff Questions', 'Lead them to picture the value of the solution — let them sell themselves.', result.needPayoffQs)}
+      ${stageHtml('s', 'S', 'Situation', 'Open the conversation. Confirm facts, build rapport.', result.situationQs)}
+      ${stageHtml('p', 'P', 'Problem', 'Get them to verbalize their pain in their own words.', result.problemQs)}
+      ${stageHtml('i', 'I', 'Implication', 'Expand the pain. Make them feel the cost of doing nothing.', result.implicationQs)}
+      ${stageHtml('n', 'N', 'Need-Payoff', 'Lead them to picture the value — let them sell themselves.', result.needPayoffQs)}
       ${visionHtml(result.visionScript)}
     `;
 
@@ -308,15 +308,20 @@
     });
   }
 
-  function stageHtml(key, title, desc, items) {
+  function stageHtml(key, letter, title, subtitle, items) {
     const lis = items.map((q) => `<li>${escapeHtml(q)}</li>`).join('');
     return `
       <div class="stage ${key}" data-stage="${key}">
         <div class="stage-header">
-          <div class="stage-title">${title}</div>
+          <div class="stage-titleblock">
+            <div class="stage-letter">${escapeHtml(letter)}</div>
+            <div>
+              <div class="stage-title">${escapeHtml(title)} Questions</div>
+              <div class="stage-subtitle">${escapeHtml(subtitle)}</div>
+            </div>
+          </div>
           <button class="copy-stage-btn" data-target="${key}">Copy</button>
         </div>
-        <p class="stage-desc">${desc}</p>
         <ul class="stage-content">${lis}</ul>
       </div>
     `;
@@ -326,10 +331,15 @@
     return `
       <div class="stage v" data-stage="v">
         <div class="stage-header">
-          <div class="stage-title">★ Vision-Casting Script</div>
+          <div class="stage-titleblock">
+            <div class="stage-letter">★</div>
+            <div>
+              <div class="stage-title">Vision-Casting Script</div>
+              <div class="stage-subtitle">Read slowly. Pause after the picture is painted. Let them sit in it.</div>
+            </div>
+          </div>
           <button class="copy-stage-btn" data-target="v">Copy</button>
         </div>
-        <p class="stage-desc">Read this slowly. Pause after the picture is painted. Let them sit in it.</p>
         <div class="vision-script stage-content">${escapeHtml(script)}</div>
       </div>
     `;
