@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thinking Canvas — Problem Solving Prompts</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #1a1d24;
+    --card-hover: #20242d;
+    --accent: #4f9cff;
+    --accent-soft: #1e2a3d;
+    --text: #e6e9ef;
+    --muted: #9aa3b2;
+    --border: #2a2f3a;
+    --tag: #2d3340;
+    --ok: #3ecf8e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    text-align: center;
+    padding: 48px 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    margin: 0 0 8px;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+  }
+  header p {
+    margin: 0 auto;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .how {
+    max-width: 720px;
+    margin: 24px auto 0;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+  .how strong { color: var(--accent); }
+  .how ol { margin: 8px 0 0; padding-left: 20px; }
+  .how li { margin: 4px 0; color: var(--muted); }
+
+  .grid {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .num {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+  }
+  .card h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+  }
+  .section { margin-top: 14px; }
+  .section-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: var(--tag);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+  .section p { margin: 0; color: var(--text); font-size: 0.92rem; }
+  .section ul, .section ol { margin: 4px 0 0; padding-left: 20px; }
+  .section li { font-size: 0.9rem; color: var(--text); margin: 3px 0; }
+  .flow {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    word-spacing: 1px;
+  }
+  .copy-btn {
+    margin-top: 18px;
+    align-self: flex-start;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .copy-btn:hover { background: #6aacff; }
+  .copy-btn.copied { background: var(--ok); }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.5rem; }
+    .grid { padding: 20px 14px 48px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Thinking Canvas</h1>
+    <p>Six structured prompts that help an AI slow down and think with you — instead of rushing to a weak answer.</p>
+    <div class="how">
+      <strong>How to use this</strong>
+      <ol>
+        <li>Pick the card that matches your situation.</li>
+        <li>Click <em>Copy prompt</em> and paste it into your AI chat.</li>
+        <li>The AI will ask what you're working on, then walk you through it step by step.</li>
+      </ol>
+    </div>
+  </header>
+
+  <main class="grid" id="grid"></main>
+
+  <footer>Thinking Canvas prompts · recreated from source slides</footer>
+
+<script>
+const prompts = [
+  {
+    num: 1,
+    title: "Map the Problem Before Solving It",
+    role: "Act as a Thinking Canvas strategist who helps me slow down, map the problem clearly, and avoid rushing into a weak answer.",
+    task: "Create a structured thinking canvas for the problem I'm facing before giving me any solution.",
+    steps: [
+      "Ask for the problem I want to solve",
+      "Restate the problem in clear language",
+      "Identify what is known, unknown, and assumed",
+      "Break the problem into smaller parts",
+      "Identify the real decision or question underneath",
+      "Only then suggest possible solution paths"
+    ],
+    rules: [
+      "Do not jump straight to advice",
+      "Separate facts from assumptions",
+      "Clarify the real problem first",
+      "Keep the thinking structured",
+      "Test: does this make the problem easier to understand"
+    ],
+    output: "Problem → Known Facts → Unknowns → Assumptions → Sub-Problems → Solution Paths"
+  },
+  {
+    num: 2,
+    title: "Think Through a Decision",
+    role: "Act as a decision strategist who uses a Thinking Canvas to compare options clearly before choosing.",
+    task: "Help me make a difficult decision by mapping options, trade-offs, risks, and long-term consequences.",
+    steps: [
+      "Ask for the decision and options I'm considering",
+      "Identify the goal behind the decision",
+      "Compare each option by upside, downside, cost, risk, and reversibility",
+      "Identify hidden trade-offs",
+      "Show the likely short-term and long-term consequences",
+      "Recommend the clearest choice based on the evidence"
+    ],
+    rules: [
+      "Do not make a shallow pros/cons list",
+      "Include emotional and practical trade-offs",
+      "Identify reversible vs irreversible decisions",
+      "Be honest about uncertainty",
+      "Test: does this make the decision feel clearer"
+    ],
+    output: "Decision → Options → Trade-Offs → Risks → Short-Term Impact → Long-Term Impact → Recommendation"
+  },
+  {
+    num: 3,
+    title: "Build a Strategy From Scratch",
+    role: "Act as a strategy architect who uses a Thinking Canvas to turn messy goals into a clear strategic plan.",
+    task: "Help me build a strategy for my goal by clarifying the objective, constraints, leverage points, and execution path.",
+    steps: [
+      "Ask for my goal, current situation, resources, and constraints",
+      "Define the real objective",
+      "Identify the biggest obstacle",
+      "Identify the highest-leverage opportunities",
+      "Create 3 strategic options",
+      "Recommend the best strategy and explain why",
+      "Turn it into an execution plan"
+    ],
+    rules: [
+      "Strategy must be specific",
+      "Do not confuse activity with progress",
+      "Focus on leverage, not busyness",
+      "Prioritize the few moves that matter most",
+      "Test: does this make execution obvious"
+    ],
+    output: "Goal → Current Situation → Constraints → Obstacles → Leverage Points → Strategic Options → Execution Plan"
+  },
+  {
+    num: 4,
+    title: "Write Before Writing",
+    role: "Act as a writing strategist who uses a Thinking Canvas to plan the message, structure, argument, and reader impact before drafting.",
+    task: "Help me think through a piece of writing before creating the final draft.",
+    steps: [
+      "Ask for the topic, audience, goal, and format",
+      "Identify the core message",
+      "Identify what the reader already believes",
+      "Identify what the reader needs to understand or feel",
+      "Build the structure before writing",
+      "Create 3 possible angles",
+      "Recommend the strongest angle and draft the piece"
+    ],
+    rules: [
+      "Do not draft before clarifying the message",
+      "Writing must serve one clear purpose",
+      "Structure must come before style",
+      "Angle must match the audience",
+      "Test: would the final draft feel sharper because the thinking is clearer"
+    ],
+    output: "Topic → Audience → Core Message → Reader Beliefs → Structure → 3 Angles → Final Draft"
+  },
+  {
+    num: 5,
+    title: "Debug a Complex Problem",
+    role: "Act as a systems thinker who uses a Thinking Canvas to debug complex problems by finding root causes instead of treating symptoms.",
+    task: "Analyze a complex problem and identify the true root cause before suggesting fixes.",
+    steps: [
+      "Ask for the problem and what I've already tried",
+      "Identify the visible symptoms",
+      "Map possible causes",
+      "Separate symptoms from root causes",
+      "Identify the most likely bottleneck",
+      "Suggest targeted fixes",
+      "Define how to test whether the fix worked"
+    ],
+    rules: [
+      "Do not solve symptoms only",
+      "Root cause must be specific",
+      "Avoid generic advice",
+      "Fixes must be testable",
+      "Test: would solving this improve the whole system"
+    ],
+    output: "Problem → Symptoms → Possible Causes → Root Cause → Bottleneck → Fixes → Test Plan"
+  },
+  {
+    num: 6,
+    title: "Pressure-Test an Idea",
+    role: "Act as a critical thinking partner who uses a Thinking Canvas to pressure-test ideas before I invest time, money, or energy into them.",
+    task: "Pressure-test my idea by identifying assumptions, risks, weak points, and ways to strengthen it.",
+    steps: [
+      "Ask for the idea and why I'm considering it",
+      "Identify the core assumption that must be true",
+      "Identify weak points and hidden risks",
+      "Identify what could make the idea fail",
+      "Suggest ways to test the idea cheaply",
+      "Recommend whether to pursue, revise, or drop it"
+    ],
+    rules: [
+      "Be honest, not encouraging by default",
+      "Assumptions must be testable",
+      "Risks must be specific",
+      "Do not kill the idea without suggesting better versions",
+      "Test: would this save me from wasting time"
+    ],
+    output: "Idea → Core Assumption → Weak Points → Failure Risks → Cheap Tests → Verdict"
+  }
+];
+
+function buildPromptText(p) {
+  const steps = p.steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
+  const rules = p.rules.map(r => `- ${r}`).join("\n");
+  return `${p.num}/ ${p.title.toUpperCase()}
+<role>
+${p.role}
+</role>
+
+<task>
+${p.task}
+</task>
+
+<steps>
+${steps}
+</steps>
+
+<rules>
+${rules}
+</rules>
+
+<output>
+${p.output}
+</output>`;
+}
+
+const grid = document.getElementById("grid");
+
+prompts.forEach(p => {
+  const card = document.createElement("article");
+  card.className = "card";
+
+  const stepsHtml = p.steps.map(s => `<li>${s}</li>`).join("");
+  const rulesHtml = p.rules.map(r => `<li>${r}</li>`).join("");
+
+  card.innerHTML = `
+    <div class="card-top">
+      <div class="num">${p.num}</div>
+      <h2>${p.title}</h2>
+    </div>
+    <div class="section">
+      <span class="section-label">Role</span>
+      <p>${p.role}</p>
+    </div>
+    <div class="section">
+      <span class="section-label">Task</span>
+      <p>${p.task}</p>
+    </div>
+    <div class="section">
+      <span class="section-label">Steps</span>
+      <ol>${stepsHtml}</ol>
+    </div>
+    <div class="section">
+      <span class="section-label">Rules</span>
+      <ul>${rulesHtml}</ul>
+    </div>
+    <div class="section">
+      <span class="section-label">Output</span>
+      <p class="flow">${p.output}</p>
+    </div>
+    <button class="copy-btn">Copy prompt</button>
+  `;
+
+  const btn = card.querySelector(".copy-btn");
+  btn.addEventListener("click", async () => {
+    const text = buildPromptText(p);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "Copy prompt";
+      btn.classList.remove("copied");
+    }, 1600);
+  });
+
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>
