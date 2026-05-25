@@ -16,6 +16,7 @@
     --border: #2a2f3a;
     --tag: #2d3340;
     --ok: #3ecf8e;
+    --err: #ff6b6b;
   }
   * { box-sizing: border-box; }
   body {
@@ -42,25 +43,123 @@
     color: var(--muted);
     font-size: 1rem;
   }
-  .how {
-    max-width: 720px;
-    margin: 24px auto 0;
-    background: var(--accent-soft);
+
+  /* ---- Solver ---- */
+  .solver {
+    max-width: 820px;
+    margin: 32px auto 0;
+    padding: 0 20px;
+  }
+  .solver-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .solver-box h2 {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+  }
+  .solver-box .sub {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 11px 13px;
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  .field textarea { resize: vertical; min-height: 96px; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .row { display: flex; gap: 14px; }
+  .row .field { flex: 1; }
+  .key-row { display: flex; gap: 10px; align-items: flex-end; }
+  .key-row .field { flex: 1; margin-bottom: 0; }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+  .hint a { color: var(--accent); }
+  .key-saved { color: var(--ok); }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+  }
+  .btn:hover { background: #6aacff; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 11px 14px;
+  }
+  .btn-ghost:hover { background: var(--card-hover); color: var(--text); }
+
+  .solve-row { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .output {
+    margin-top: 18px;
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px 20px;
-    text-align: left;
+    padding: 18px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
     font-size: 0.92rem;
-    color: var(--text);
+    line-height: 1.6;
+    display: none;
   }
-  .how strong { color: var(--accent); }
-  .how ol { margin: 8px 0 0; padding-left: 20px; }
-  .how li { margin: 4px 0; color: var(--muted); }
+  .output.show { display: block; }
+  .output.error { border-color: var(--err); color: var(--err); }
+  .output strong { color: var(--accent); }
+
+  /* ---- Cards ---- */
+  .grid-head {
+    text-align: center;
+    margin: 56px auto 0;
+    max-width: 720px;
+    padding: 0 20px;
+  }
+  .grid-head h2 { margin: 0 0 6px; font-size: 1.3rem; }
+  .grid-head p { margin: 0; color: var(--muted); font-size: 0.92rem; }
 
   .grid {
     max-width: 1180px;
     margin: 0 auto;
-    padding: 32px 20px 64px;
+    padding: 24px 20px 64px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
     gap: 20px;
@@ -72,7 +171,7 @@
     padding: 22px;
     display: flex;
     flex-direction: column;
-    transition: border-color .15s, transform .15s;
+    transition: border-color .15s;
   }
   .card:hover { border-color: var(--accent); }
   .card-top {
@@ -94,7 +193,7 @@
     justify-content: center;
     font-size: 1.05rem;
   }
-  .card h2 {
+  .card h3 {
     margin: 0;
     font-size: 1.1rem;
     letter-spacing: -0.01em;
@@ -120,23 +219,32 @@
     font-size: 0.85rem;
     color: var(--muted);
     font-style: italic;
-    word-spacing: 1px;
   }
+  .card-btns { display: flex; gap: 8px; margin-top: 18px; }
   .copy-btn {
-    margin-top: 18px;
-    align-self: flex-start;
     background: var(--accent);
     color: #fff;
     border: none;
-    padding: 10px 16px;
+    padding: 9px 14px;
     border-radius: 10px;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: background .15s;
   }
   .copy-btn:hover { background: #6aacff; }
   .copy-btn.copied { background: var(--ok); }
+  .use-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .use-btn:hover { background: var(--card-hover); color: var(--text); }
 
   footer {
     text-align: center;
@@ -147,6 +255,7 @@
   }
   @media (max-width: 600px) {
     header h1 { font-size: 1.5rem; }
+    .row { flex-direction: column; gap: 0; }
     .grid { padding: 20px 14px 48px; }
   }
 </style>
@@ -154,20 +263,60 @@
 <body>
   <header>
     <h1>Thinking Canvas</h1>
-    <p>Six structured prompts that help an AI slow down and think with you — instead of rushing to a weak answer.</p>
-    <div class="how">
-      <strong>How to use this</strong>
-      <ol>
-        <li>Pick the card that matches your situation.</li>
-        <li>Click <em>Copy prompt</em> and paste it into your AI chat.</li>
-        <li>The AI will ask what you're working on, then walk you through it step by step.</li>
-      </ol>
-    </div>
+    <p>Type a problem, pick a thinking style, and get a structured answer — or copy any prompt to use elsewhere.</p>
   </header>
 
+  <!-- Solver -->
+  <section class="solver">
+    <div class="solver-box">
+      <h2>Solve a problem</h2>
+      <p class="sub">Describe what you're facing. The selected canvas guides the AI to think it through step by step.</p>
+
+      <div class="key-row">
+        <div class="field">
+          <label for="apiKey">Anthropic API key</label>
+          <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+        </div>
+        <button class="btn btn-ghost" id="saveKey" type="button">Save</button>
+      </div>
+      <p class="hint" id="keyHint">Stored only in this browser (localStorage). Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
+
+      <div class="row" style="margin-top:14px;">
+        <div class="field">
+          <label for="canvasPick">Thinking canvas</label>
+          <select id="canvasPick"></select>
+        </div>
+        <div class="field">
+          <label for="modelPick">Model</label>
+          <select id="modelPick">
+            <option value="claude-sonnet-4-6">Sonnet 4.6 (fast, recommended)</option>
+            <option value="claude-opus-4-7">Opus 4.7 (most capable)</option>
+            <option value="claude-haiku-4-5-20251001">Haiku 4.5 (fastest, cheapest)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="problem">Your problem</label>
+        <textarea id="problem" placeholder="e.g. I keep starting side projects but never finish them. I want to figure out why and what to change."></textarea>
+      </div>
+
+      <div class="solve-row">
+        <button class="btn" id="solveBtn" type="button">Solve it</button>
+        <div class="spinner" id="spinner"></div>
+      </div>
+
+      <div class="output" id="output"></div>
+    </div>
+  </section>
+
+  <div class="grid-head">
+    <h2>The six canvases</h2>
+    <p>Each is a reusable prompt. Copy it to paste into any AI, or load it into the solver above.</p>
+  </div>
   <main class="grid" id="grid"></main>
 
-  <footer>Thinking Canvas prompts · recreated from source slides</footer>
+  <footer>Thinking Canvas · recreated from source slides</footer>
 
 <script>
 const prompts = [
@@ -308,6 +457,7 @@ const prompts = [
   }
 ];
 
+/* ---------- prompt builders ---------- */
 function buildPromptText(p) {
   const steps = p.steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
   const rules = p.rules.map(r => `- ${r}`).join("\n");
@@ -333,45 +483,154 @@ ${p.output}
 </output>`;
 }
 
-const grid = document.getElementById("grid");
+function buildSystemPrompt(p) {
+  const steps = p.steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
+  const rules = p.rules.map(r => `- ${r}`).join("\n");
+  return `${p.role}
 
+TASK: ${p.task}
+
+Work through these steps in order. The user has already provided their problem in their message, so skip step 1 (do not ask for it again) and begin directly. If a critical detail is genuinely missing, state a reasonable assumption and continue rather than stopping to ask.
+
+STEPS:
+${steps}
+
+RULES:
+${rules}
+
+Format your answer using this flow as section headings:
+${p.output}`;
+}
+
+/* ---------- API key handling ---------- */
+const keyInput = document.getElementById("apiKey");
+const keyHint = document.getElementById("keyHint");
+const saveKeyBtn = document.getElementById("saveKey");
+const KEY_STORE = "thinkingCanvasApiKey";
+
+const stored = localStorage.getItem(KEY_STORE);
+if (stored) {
+  keyInput.value = stored;
+  keyHint.innerHTML = '<span class="key-saved">Key loaded from this browser.</span> Stored only locally.';
+}
+saveKeyBtn.addEventListener("click", () => {
+  const v = keyInput.value.trim();
+  if (v) {
+    localStorage.setItem(KEY_STORE, v);
+    keyHint.innerHTML = '<span class="key-saved">Saved to this browser.</span> Not uploaded anywhere.';
+  } else {
+    localStorage.removeItem(KEY_STORE);
+    keyHint.textContent = "Key cleared.";
+  }
+});
+
+/* ---------- canvas picker ---------- */
+const canvasPick = document.getElementById("canvasPick");
+prompts.forEach(p => {
+  const opt = document.createElement("option");
+  opt.value = p.num;
+  opt.textContent = `${p.num}. ${p.title}`;
+  canvasPick.appendChild(opt);
+});
+
+/* ---------- solve ---------- */
+const solveBtn = document.getElementById("solveBtn");
+const spinner = document.getElementById("spinner");
+const output = document.getElementById("output");
+const problemEl = document.getElementById("problem");
+const modelPick = document.getElementById("modelPick");
+
+function renderText(text) {
+  const esc = text
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return esc.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
+async function solve() {
+  const apiKey = keyInput.value.trim();
+  const problem = problemEl.value.trim();
+  const canvas = prompts.find(p => p.num == canvasPick.value);
+
+  output.className = "output show";
+
+  if (!apiKey) {
+    output.classList.add("error");
+    output.textContent = "Add your Anthropic API key first.";
+    return;
+  }
+  if (!problem) {
+    output.classList.add("error");
+    output.textContent = "Describe your problem in the box above.";
+    return;
+  }
+
+  solveBtn.disabled = true;
+  spinner.style.display = "block";
+  output.classList.remove("error");
+  output.textContent = "Thinking…";
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: modelPick.value,
+        max_tokens: 2048,
+        system: buildSystemPrompt(canvas),
+        messages: [{ role: "user", content: "Here is my problem:\n\n" + problem }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      const msg = (data && data.error && data.error.message) ? data.error.message : ("HTTP " + res.status);
+      throw new Error(msg);
+    }
+    const text = (data.content || []).map(b => b.text || "").join("").trim();
+    output.classList.remove("error");
+    output.innerHTML = renderText(text || "(empty response)");
+  } catch (err) {
+    output.classList.add("error");
+    output.textContent = "Error: " + err.message +
+      "\n\nCommon causes: wrong/expired key, no API credit, or the selected model id isn't available to your account (try a different model).";
+  } finally {
+    solveBtn.disabled = false;
+    spinner.style.display = "none";
+  }
+}
+solveBtn.addEventListener("click", solve);
+
+/* ---------- cards ---------- */
+const grid = document.getElementById("grid");
 prompts.forEach(p => {
   const card = document.createElement("article");
   card.className = "card";
-
   const stepsHtml = p.steps.map(s => `<li>${s}</li>`).join("");
   const rulesHtml = p.rules.map(r => `<li>${r}</li>`).join("");
 
   card.innerHTML = `
     <div class="card-top">
       <div class="num">${p.num}</div>
-      <h2>${p.title}</h2>
+      <h3>${p.title}</h3>
     </div>
-    <div class="section">
-      <span class="section-label">Role</span>
-      <p>${p.role}</p>
+    <div class="section"><span class="section-label">Role</span><p>${p.role}</p></div>
+    <div class="section"><span class="section-label">Task</span><p>${p.task}</p></div>
+    <div class="section"><span class="section-label">Steps</span><ol>${stepsHtml}</ol></div>
+    <div class="section"><span class="section-label">Rules</span><ul>${rulesHtml}</ul></div>
+    <div class="section"><span class="section-label">Output</span><p class="flow">${p.output}</p></div>
+    <div class="card-btns">
+      <button class="copy-btn" type="button">Copy prompt</button>
+      <button class="use-btn" type="button">Use in solver</button>
     </div>
-    <div class="section">
-      <span class="section-label">Task</span>
-      <p>${p.task}</p>
-    </div>
-    <div class="section">
-      <span class="section-label">Steps</span>
-      <ol>${stepsHtml}</ol>
-    </div>
-    <div class="section">
-      <span class="section-label">Rules</span>
-      <ul>${rulesHtml}</ul>
-    </div>
-    <div class="section">
-      <span class="section-label">Output</span>
-      <p class="flow">${p.output}</p>
-    </div>
-    <button class="copy-btn">Copy prompt</button>
   `;
 
-  const btn = card.querySelector(".copy-btn");
-  btn.addEventListener("click", async () => {
+  const copyBtn = card.querySelector(".copy-btn");
+  copyBtn.addEventListener("click", async () => {
     const text = buildPromptText(p);
     try {
       await navigator.clipboard.writeText(text);
@@ -383,12 +642,16 @@ prompts.forEach(p => {
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
-    btn.textContent = "Copied!";
-    btn.classList.add("copied");
-    setTimeout(() => {
-      btn.textContent = "Copy prompt";
-      btn.classList.remove("copied");
-    }, 1600);
+    copyBtn.textContent = "Copied!";
+    copyBtn.classList.add("copied");
+    setTimeout(() => { copyBtn.textContent = "Copy prompt"; copyBtn.classList.remove("copied"); }, 1600);
+  });
+
+  const useBtn = card.querySelector(".use-btn");
+  useBtn.addEventListener("click", () => {
+    canvasPick.value = p.num;
+    document.querySelector(".solver").scrollIntoView({ behavior: "smooth", block: "start" });
+    problemEl.focus();
   });
 
   grid.appendChild(card);
