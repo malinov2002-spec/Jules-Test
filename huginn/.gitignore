@@ -1,0 +1,3 @@
+# The Huginn upstream checkout is large and reproducible from setup.sh.
+# It (and its generated .env, which holds a real secret) is not committed.
+src/
